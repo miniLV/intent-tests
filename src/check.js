@@ -48,7 +48,7 @@ export function check({ cwd = process.cwd(), intentFile = 'INTENT.md', base = 'H
   const root = repoRoot(cwd);
   const intentAbs = join(root, intentFile);
   if (!existsSync(intentAbs)) {
-    const err = new Error(`No ${intentFile} found at ${root}. Write one first (see examples/INTENT.md).`);
+    const err = new Error(`No ${intentFile} found at ${root}. Write one first (see examples/tasks/intents/).`);
     err.code = 'NO_INTENT';
     throw err;
   }

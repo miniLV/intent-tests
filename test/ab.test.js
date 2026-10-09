@@ -104,3 +104,34 @@ test('CLI dry run on the bundled example', () => {
   assert.match(r.stdout, /\| B `intent-first` \| 2 \| 2\/2/);
   assert.match(r.stderr, /Wrote .*results/);
 });
+
+test('task file with a pinned "repo" is cloned and used as the target', () => {
+  const upstream = tempRepo({ 'index.js': 'module.exports = 1;\n' });
+  const pinned = sh(upstream, 'rev-parse', 'HEAD').trim();
+  writeFileSync(join(upstream, 'index.js'), 'module.exports = 2;\n');
+  sh(upstream, 'commit', '-qam', 'later');
+  const dir = mkdtempSync(join(tmpdir(), 'intent-ab-repo-'));
+  const file = join(dir, 'tasks.json');
+  writeFileSync(file, JSON.stringify({
+    repo: { url: upstream, commit: pinned },
+    tasks: [{ id: 'bump', prompt: 'p', verify: `node -e "process.exit(require('./index.js') === 3 ? 0 : 1)"` }],
+  }));
+  const cwd = mkdtempSync(join(tmpdir(), 'intent-ab-cwd-'));
+  const agent = `node -e "require('fs').writeFileSync('index.js', 'module.exports = ' + (require('./index.js') + 2) + ';')"`;
+  const { result, jsonPath } = runAB({ tasksFile: file, cwd, agent, arms: ['A'] });
+  assert.equal(result.base, pinned);
+  assert.equal(result.runs[0].verify.pass, true, JSON.stringify(result.runs[0]));
+  assert.ok(jsonPath.startsWith(join(cwd, 'results')));
+});
+
+test('bundled vercel/ms example is well-formed', () => {
+  const t = loadTasks(fileURLToPath(new URL('../examples/tasks/tasks.json', import.meta.url)));
+  assert.equal(t.spec.repo.url, 'https://github.com/vercel/ms.git');
+  assert.match(t.spec.repo.commit, /^[0-9a-f]{40}$/);
+  assert.deepEqual(t.tasks.map((x) => x.id), ['month-unit', 'compound-durations', 'strict-option']);
+  for (const task of t.tasks) {
+    assert.ok(existsSync(join(t.dir, task.intent)), task.intent);
+    const script = task.verify.match(/\{taskdir\}\/(\S+)/)[1];
+    assert.ok(existsSync(join(t.dir, script)), script);
+  }
+});

@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawnSync, execFileSync } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -113,11 +113,22 @@ export function runAB({
   log = () => {},
   now = new Date(),
 }) {
-  const root = repoRoot(cwd);
   const { file, dir, spec, tasks } = loadTasks(tasksFile);
-  const base = git(root, ['rev-parse', spec.base || 'HEAD']).trim();
-  const agentTemplate = dryRun ? FAKE_AGENT : agent || spec.agent || DEFAULT_AGENT;
   const scratch = mkdtempSync(join(tmpdir(), 'intent-ab-'));
+  // With `"repo": {"url", "commit"}` the task file brings its own target repo:
+  // clone it once at the pinned commit and run every arm from that clone.
+  // Without it, the repo containing `cwd` is the target.
+  let root;
+  let outBase;
+  if (spec.repo) {
+    root = cloneAt(spec.repo, join(scratch, 'source'), log);
+    outBase = resolve(cwd);
+  } else {
+    root = repoRoot(cwd);
+    outBase = root;
+  }
+  const base = git(root, ['rev-parse', spec.repo?.commit || spec.base || 'HEAD']).trim();
+  const agentTemplate = dryRun ? FAKE_AGENT : agent || spec.agent || DEFAULT_AGENT;
   const runs = [];
 
   let order = 0;
@@ -179,7 +190,7 @@ export function runAB({
     version: 1,
     dryRun,
     createdAt: now.toISOString(),
-    repo: root,
+    repo: spec.repo ? `${spec.repo.url} (cloned)` : root,
     base,
     tasksFile: file,
     agent: dryRun ? 'fake-agent (dry run)' : agentTemplate,
@@ -190,13 +201,21 @@ export function runAB({
     caveat: CAVEAT,
   };
   const stamp = now.toISOString().replace(/[:.]/g, '-');
-  const outAbs = resolve(root, outDir);
+  const outAbs = resolve(outBase, outDir);
   mkdirSync(outAbs, { recursive: true });
   const jsonPath = join(outAbs, `${stamp}.json`);
   const mdPath = join(outAbs, `${stamp}.md`);
   writeFileSync(jsonPath, JSON.stringify(result, null, 2) + '\n');
   writeFileSync(mdPath, formatSummary(result));
   return { result, jsonPath, mdPath };
+}
+
+export function cloneAt(repo, dest, log = () => {}) {
+  if (!repo.url || !repo.commit) throw new Error('"repo" needs both "url" and "commit"');
+  log(`cloning ${repo.url} @ ${repo.commit.slice(0, 12)}...`);
+  execFileSync('git', ['clone', '--quiet', '--no-checkout', repo.url, dest], { stdio: ['ignore', 'ignore', 'pipe'] });
+  git(dest, ['checkout', '--quiet', '--detach', repo.commit]);
+  return dest;
 }
 
 function runAgent(cmd, cwd, timeoutMs, env) {

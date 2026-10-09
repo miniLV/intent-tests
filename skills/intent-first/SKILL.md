@@ -20,7 +20,7 @@ The human states what "done" means in `INTENT.md`. You implement against it, ski
    - Do not write throwaway test scripts to "check your work". Run the commands the human listed instead.
    - Running existing tests is fine.
    - Stay inside `## Scope`. If you must go outside it, stop and say why.
-4. **Check.** Run `intent-check` (see below). It flags unrequested test files and out-of-scope changes and runs every acceptance check written as a command (an item that starts with `` `cmd` ``).
+4. **Check.** Run `intent-check` (see below). It flags unrequested test files and out-of-scope changes and runs every acceptance check written as a command (`` `cmd` passes `` or `` `cmd` exits 0 ``).
 5. **Report.** Finish with one line per acceptance check:
    `#<n> <PASS|FAIL|NOT VERIFIED> <check>: <evidence: command output, file:line, or why it can't be verified here>`.
    Never claim PASS for a manual check without concrete evidence. Say NOT VERIFIED instead.

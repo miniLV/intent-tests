@@ -1,0 +1,13 @@
+const { load, runner, regression } = require('./_lib.cjs');
+const ms = load();
+const t = runner();
+const MO = 2629800000;
+t.eq("ms('1mo')", ms('1mo'), MO);
+t.eq("ms('1 month')", ms('1 month'), MO);
+t.eq("ms('2 months')", ms('2 months'), 2 * MO);
+t.eq("ms('1.5mo')", ms('1.5mo'), 1.5 * MO);
+t.eq("ms('-1mo')", ms('-1mo'), -MO);
+t.eq("ms('3 MONTHS')", ms('3 MONTHS'), 3 * MO);
+t.eq("ms('1mon')", ms('1mon'), undefined);
+regression(ms, t);
+t.done();

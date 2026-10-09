@@ -12,7 +12,7 @@
     "intent-check": "bin/intent-check.js",
     "intent-ab": "bin/intent-ab.js"
   },
-  "files": ["bin", "src", "skills", "examples", "README.md", "README.zh-CN.md", "LICENSE"],
+  "files": ["bin", "src", "skills", "examples", "README.md", "README.en.md", "LICENSE"],
   "engines": { "node": ">=20" },
   "keywords": ["codex", "claude-code", "coding-agents", "testing", "ai-agents", "token-efficiency"],
   "scripts": {

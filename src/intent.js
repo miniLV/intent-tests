@@ -2,7 +2,7 @@
 //
 // Recognised sections (H2, case-insensitive):
 //   ## Goal               free text
-//   ## Acceptance checks  list items; an item that starts with `cmd` is a command check
+//   ## Acceptance checks  list items; "`cmd` passes" / "`cmd` exits 0" is a command check
 //   ## Scope              globs the change may touch (optional; omitted = no scope check)
 //   ## Out of scope       free text list (informational)
 //   ## Allowed tests      globs of test files the agent may add/modify, or "none" (default: none)
@@ -61,7 +61,8 @@ export function parseIntent(markdown) {
   const acceptance = listItems(sections.acceptance || []).map((item, index) => {
     const box = item.match(/^\[( |x|X)\]\s*(.*)$/);
     const text = box ? box[2].trim() : item;
-    const cmd = text.match(/^`([^`]+)`/);
+    // A command check is a code span followed only by `passes`, `succeeds` or `exits 0` (or nothing).
+    const cmd = text.match(/^`([^`]+)`\s*(?:(?:passes|succeeds|exits (?:with )?0)\b\.?)?\s*$/i);
     return {
       id: index + 1,
       text,

@@ -1,0 +1,13 @@
+const { load, runner, regression } = require('./_lib.cjs');
+const ms = load();
+const t = runner();
+t.eq("ms('1h 30m')", ms('1h 30m'), 5400000);
+t.eq("ms('1h30m')", ms('1h30m'), 5400000);
+t.eq("ms('1d 2h 3m 4s')", ms('1d 2h 3m 4s'), 86400000 + 7200000 + 180000 + 4000);
+t.eq("ms('2 days 3 hours')", ms('2 days 3 hours'), 183600000);
+t.eq("ms('1m 500ms')", ms('1m 500ms'), 60500);
+t.eq("ms('1h foo')", ms('1h foo'), undefined);
+t.eq("ms('foo 1h')", ms('foo 1h'), undefined);
+t.eq('> 100 chars', ms('1h '.repeat(40)), undefined);
+regression(ms, t);
+t.done();
