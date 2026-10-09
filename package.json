@@ -1,0 +1,21 @@
+{
+  "name": "intent-tests",
+  "version": "0.1.0",
+  "description": "Stop coding agents from writing tests that just echo their own code. State intent, let the agent implement, and A/B whether self-written tests were worth the tokens on your own repo.",
+  "type": "module",
+  "license": "MIT",
+  "author": "miniLV",
+  "repository": { "type": "git", "url": "git+https://github.com/miniLV/intent-tests.git" },
+  "homepage": "https://github.com/miniLV/intent-tests#readme",
+  "bugs": { "url": "https://github.com/miniLV/intent-tests/issues" },
+  "bin": {
+    "intent-check": "bin/intent-check.js",
+    "intent-ab": "bin/intent-ab.js"
+  },
+  "files": ["bin", "src", "skills", "examples", "README.md", "README.zh-CN.md", "LICENSE"],
+  "engines": { "node": ">=20" },
+  "keywords": ["codex", "claude-code", "coding-agents", "testing", "ai-agents", "token-efficiency"],
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "base": "HEAD",
+  "setup": "npm ci --silent || npm install --silent",
+  "tasks": [
+    {
+      "id": "slugify-accents",
+      "prompt": "Make slugify() in src/slugify.js strip accents and collapse repeated separators.",
+      "acceptance": [
+        "slugify('Crème  Brûlée!') returns 'creme-brulee'",
+        "Public API unchanged"
+      ],
+      "verify": "node {taskdir}/verify/slugify-accents.mjs"
+    },
+    {
+      "id": "retry-backoff",
+      "prompt": "Add exponential backoff (base 100ms, max 3 retries) to fetchWithRetry() in src/http.js.",
+      "intent": "intents/retry-backoff.md",
+      "verify": "npm test"
+    }
+  ]
+}

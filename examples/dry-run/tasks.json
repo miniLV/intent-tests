@@ -1,0 +1,14 @@
+{
+  "tasks": [
+    {
+      "id": "hello",
+      "prompt": "Create fake-agent/hello.txt.",
+      "verify": "node -e \"process.exit(require('fs').existsSync('fake-agent/hello.txt') ? 0 : 1)\""
+    },
+    {
+      "id": "world",
+      "prompt": "Create fake-agent/world.txt.",
+      "verify": "node -e \"process.exit(require('fs').existsSync('fake-agent/world.txt') ? 0 : 1)\""
+    }
+  ]
+}
